@@ -1,4 +1,4 @@
-module caddy-service-token
+module github.com/Laugslander/caddy-service-token
 
 go 1.23.2
 
