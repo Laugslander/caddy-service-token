@@ -5,8 +5,10 @@
 
 :8080 {
     service_token {
-        service_id foo
-        service_key bar
+        region "eu-west-1"
+        environment "client-test"
+        service_id ""
+        service_key ""
     }
 
     reverse_proxy https://caddy.free.beeceptor.com {
