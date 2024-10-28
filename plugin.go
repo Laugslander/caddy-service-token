@@ -16,10 +16,11 @@ func init() {
 }
 
 type ServiceToken struct {
-	Region      string `json:"region,omitempty"`
-	Environment string `json:"environment,omitempty"`
-	ServiceId   string `json:"service_id,omitempty"`
-	ServiceKey  string `json:"service_key,omitempty"`
+	Region      string
+	Environment string
+	ServiceId   string
+	ServiceKey  string
+	iamClient   *iam.Client
 }
 
 func (ServiceToken) CaddyModule() caddy.ModuleInfo {
@@ -30,20 +31,14 @@ func (ServiceToken) CaddyModule() caddy.ModuleInfo {
 }
 
 func (m *ServiceToken) Provision(ctx caddy.Context) error {
-	return nil
-}
+	println("Provisioning IAM client")
 
-func (m *ServiceToken) Validate() error {
-	return nil
-}
-
-func (m ServiceToken) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 	iamClient, err := iam.NewClient(http.DefaultClient, &iam.Config{
 		Region:      m.Region,
 		Environment: m.Environment,
 	})
 	if err != nil {
-		println("error initializing IAM client", "error", err)
+		println("Error while initializing IAM client", "error", err)
 		return err
 	}
 	println("logging in", "serviceID", m.ServiceId)
@@ -52,12 +47,16 @@ func (m ServiceToken) ServeHTTP(w http.ResponseWriter, r *http.Request, next cad
 		PrivateKey: m.ServiceKey,
 	})
 	if err != nil {
-		println("error logging in", "error", err)
+		println("Error while logging in with service credentials", "error", err)
 		return err
 	}
 
-	token, _ := iamClient.Token()
+	m.iamClient = iamClient
+	return nil
+}
 
+func (m ServiceToken) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
+	token, _ := m.iamClient.Token()
 	r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	return next.ServeHTTP(w, r)
@@ -102,7 +101,6 @@ func parseCaddyfile(h httpcaddyfile.Helper) (caddyhttp.MiddlewareHandler, error)
 }
 
 var (
-	_ caddy.Validator             = (*ServiceToken)(nil)
 	_ caddyhttp.MiddlewareHandler = (*ServiceToken)(nil)
 	_ caddyfile.Unmarshaler       = (*ServiceToken)(nil)
 	_ caddy.Module                = (*ServiceToken)(nil)
