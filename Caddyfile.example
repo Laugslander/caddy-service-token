@@ -1,21 +1,17 @@
 ﻿{
     debug
-    order service_token first # https://caddyserver.com/docs/caddyfile/options#order
+    order service_token first
 }
 
 :8080 {
     service_token {
-        region "eu-west-1"
-        environment "client-test"
-        service_id ""
-        service_key ""
+        region "<region>"
+        environment "<environment>"
+        service_id "<service_id>"
+        service_key "<service_key>"
     }
 
-    reverse_proxy https://caddy.free.beeceptor.com {
+    reverse_proxy <hsp_service> {
         header_up Host {upstream_hostport}
-
-        transport http {
-            tls_insecure_skip_verify
-        }
     }
 }
