@@ -66,34 +66,32 @@ func (m ServiceToken) ServeHTTP(w http.ResponseWriter, r *http.Request, next cad
 func (m *ServiceToken) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
 		for d.NextBlock(0) {
-			if err := m.setField(d); err != nil {
-				return err
+			switch d.Val() {
+			case "region":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				m.Region = d.Val()
+			case "environment":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				m.Environment = d.Val()
+			case "service_id":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				m.ServiceId = d.Val()
+			case "service_key":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				m.ServiceKey = d.Val()
+			default:
+				return d.Errf("unexpected token '%s' in service_token block", d.Val())
 			}
 		}
 	}
-	return nil
-}
-
-// setField maps dispenser tokens to struct fields and assigns values accordingly.
-func (m *ServiceToken) setField(d *caddyfile.Dispenser) error {
-	if !d.NextArg() {
-		return d.ArgErr()
-	}
-
-	value := d.Val()
-	switch d.Val() {
-	case "region":
-		m.Region = value
-	case "environment":
-		m.Environment = value
-	case "service_id":
-		m.ServiceId = value
-	case "service_key":
-		m.ServiceKey = value
-	default:
-		return d.Errf("unexpected token '%s' in service_token block", d.Val())
-	}
-
 	return nil
 }
 
