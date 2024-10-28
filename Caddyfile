@@ -1,0 +1,19 @@
+﻿{
+    debug
+    order service_token first # https://caddyserver.com/docs/caddyfile/options#order
+}
+
+:8080 {
+    service_token {
+        service_id foo
+        service_key bar
+    }
+
+    reverse_proxy https://caddy.free.beeceptor.com {
+        header_up Host {upstream_hostport}
+
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}
