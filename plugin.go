@@ -21,7 +21,7 @@ func (ServiceToken) CaddyModule() caddy.ModuleInfo {
 }
 
 func (h ServiceToken) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
-	fmt.Print(w, "Hello from my plugin!")
+	fmt.Fprintf(w, "Hello from my plugin!")
 
 	return next.ServeHTTP(w, r)
 }
