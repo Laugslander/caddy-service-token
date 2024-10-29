@@ -34,7 +34,11 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/caddy-service-token:latest .
-
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/caddy-service-token:latest \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/caddy-service-token:${{ github.run_id }} .
+      
       - name: Push Docker Image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/caddy-service-token:latest
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/caddy-service-token:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/caddy-service-token:${{ github.run_id }}
